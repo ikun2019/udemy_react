@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Users from './user/pages/Users';
 import NewPlace from './places/pages/NewPlace';
@@ -7,21 +7,50 @@ import MainNavigation from './shared/components/Navigation/MainNavigation';
 import UpdatePlace from './places/pages/UpdatePlace';
 import Auth from './user/pages/Auth';
 
+import { AuthContext } from './shared/context/auth-context';
+
 function App() {
+	const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+	const login = useCallback(() => {
+		setIsLoggedIn(true);
+	}, []);
+
+	const logout = useCallback(() => {
+		setIsLoggedIn(false);
+	}, []);
+
+	let routes;
+	if (isLoggedIn) {
+		routes = (
+			<>
+				<Route exact path="/" element={<Users />}></Route>
+				<Route path="/places/new" element={<NewPlace />}></Route>
+				<Route path="/places/:placeId" element={<UpdatePlace />}></Route>
+				<Route path="/:userId/places" element={<UserPlaces />}></Route>
+				<Route path="*" element={<Navigate to="/" />}></Route>
+			</>
+		);
+	} else {
+		routes = (
+			<>
+				<Route exact path="/" element={<Users />}></Route>
+				<Route path="/:userId/places" element={<UserPlaces />}></Route>
+				<Route path="/auth" element={<Auth />}></Route>
+				<Route path="*" element={<Navigate to="/auth" />}></Route>
+			</>
+		);
+	}
+
 	return (
-		<BrowserRouter>
-			<MainNavigation />
-			<main>
-				<Routes>
-					<Route exact path="/" element={<Users />}></Route>
-					<Route path="/places/new" element={<NewPlace />}></Route>
-					<Route path="/places/:placeId" element={<UpdatePlace />}></Route>
-					<Route path="/:userId/places" element={<UserPlaces />}></Route>
-					<Route path="/auth" element={<Auth />}></Route>
-					<Route path="*" element={<Navigate to="/" />}></Route>
-				</Routes>
-			</main>
-		</BrowserRouter>
+		<AuthContext.Provider value={{ isLoggedIn: isLoggedIn, login: login, logout: logout }}>
+			<BrowserRouter>
+				<MainNavigation />
+				<main>
+					<Routes>{routes}</Routes>
+				</main>
+			</BrowserRouter>
+		</AuthContext.Provider>
 	);
 }
 
