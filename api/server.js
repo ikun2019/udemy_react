@@ -13,6 +13,15 @@ app.use(express.json(), express.urlencoded({ extended: false }), cors());
 app.use('/api/places', placesRouter);
 app.use('/api/users', usersRouter);
 
+app.use((error, req, res, next) => {
+  if (res.headersSent) {
+    return next(error);
+  };
+  res.status(error.code || 500).json({
+    message: error.message || "Unknown error",
+  });
+});
+
 // * アプリの起動
 app.listen({ port: 8080 }, () => {
   console.log('Server is running!');
