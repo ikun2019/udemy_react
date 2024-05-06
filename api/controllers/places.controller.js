@@ -1,6 +1,6 @@
 const HttpError = require('../models/http-error');
-
-const DUMMY_PLACES = [
+const { v4: uuidv4 } = require('uuid');
+let DUMMY_PLACES = [
   {
     id: 'p1',
     title: 'Empire State Building',
@@ -15,9 +15,7 @@ const DUMMY_PLACES = [
 ]
 
 const getPlaces = (req, res) => {
-  res.json({
-    message: 'places page',
-  });
+  res.json(DUMMY_PLACES);
 };
 
 const getPlaceById = (req, res) => {
@@ -38,8 +36,51 @@ const getPlaceByUserId = (req, res) => {
   res.status(200).json(place);
 };
 
+const createPlace = (req, res) => {
+  const { title, description, cordinates, address, creator } = req.body;
+  const createPlace = {
+    id: uuidv4(),
+    title,
+    description,
+    location: cordinates,
+    address,
+    creator,
+  };
+
+  DUMMY_PLACES.push(createPlace);
+  res.status(201).json({ place: createPlace });
+};
+
+const updatePlaceById = (req, res) => {
+  const pid = req.params.pid;
+  const { title, description } = req.body;
+  const updatePlace = DUMMY_PLACES.find(place => place.id === pid);
+  if (!updatePlace) {
+    const error = HttpError('placeが見つかりません', 404);
+    return next(error);
+  };
+
+  const placeIndex = DUMMY_PLACES.findIndex(p => p.id === pid);
+  const newPlace = {
+    ...updatePlace,
+    title: title,
+    description: description,
+  };
+  DUMMY_PLACES[placeIndex] = newPlace;
+  res.status(200).json({ place: newPlace });
+};
+
+const deletePlaceById = (req, res) => {
+  const pid = req.params.pid;
+  DUMMY_PLACES = DUMMY_PLACES.filter(places => places.id !== pid);
+  res.status(200).json({ message: 'Deleted place.' });
+};
+
 module.exports = {
   getPlaces,
   getPlaceById,
-  getPlaceByUserId
+  getPlaceByUserId,
+  createPlace,
+  updatePlaceById,
+  deletePlaceById
 };
