@@ -1,5 +1,6 @@
 const HttpError = require('../models/http-error');
 const { v4: uuidv4 } = require('uuid');
+const { validationResult } = require('express-validator');
 let DUMMY_PLACES = [
   {
     id: 'p1',
@@ -40,7 +41,12 @@ const getPlaceByUserId = (req, res, next) => {
 };
 
 // * POST => /api/places
-const createPlace = (req, res) => {
+const createPlace = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new HttpError('入力内容に誤りがあります', 422))
+  };
+
   const { title, description, cordinates, address, creator } = req.body;
   const createPlace = {
     id: uuidv4(),
@@ -57,6 +63,11 @@ const createPlace = (req, res) => {
 
 // * PUT => /api/places/:pid
 const updatePlaceById = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new HttpError('入力内容に誤りがあります', 422));
+  };
+
   const pid = req.params.pid;
   const { title, description } = req.body;
   const updatePlace = DUMMY_PLACES.find(place => place.id === pid);
@@ -76,8 +87,12 @@ const updatePlaceById = (req, res, next) => {
 };
 
 // * DELETE => /api/places/:pid
-const deletePlaceById = (req, res) => {
+const deletePlaceById = (req, res, next) => {
   const pid = req.params.pid;
+  if (!DUMMY_PLACES.find(p => p.id === pid)) {
+    return next(new HttpError('指定されたidのplaceが見つかりません', 404));
+  };
+
   DUMMY_PLACES = DUMMY_PLACES.filter(places => places.id !== pid);
   res.status(200).json({ message: 'Deleted place.' });
 };

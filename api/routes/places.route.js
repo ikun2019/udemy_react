@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const { check } = require('express-validator');
 
 const { getPlaces, getPlaceById, getPlaceByUserId, createPlace, updatePlaceById, deletePlaceById } = require('../controllers/places.controller.js');
 
@@ -12,10 +13,21 @@ router.get('/:pid', getPlaceById);
 router.get('/user/:uid', getPlaceByUserId);
 
 // * POST => /api/places
-router.post('/', createPlace);
+router.post('/',
+  [
+    check('title').not().isEmpty(),
+    check('description').isLength({ min: 5 }),
+    check('address').not().isEmpty(),
+  ],
+  createPlace);
 
 // * PUT => /api/places/:pid
-router.put('/:pid', updatePlaceById);
+router.put('/:pid',
+  [
+    check('title').not().isEmpty(),
+    check('description').isLength({ min: 5 }),
+  ],
+  updatePlaceById);
 
 // * DELETE => /api/places/:pid
 router.delete('/:pid', deletePlaceById);
