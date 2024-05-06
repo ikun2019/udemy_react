@@ -14,10 +14,12 @@ let DUMMY_PLACES = [
   }
 ]
 
+// * GET => /api/places
 const getPlaces = (req, res) => {
   res.json(DUMMY_PLACES);
 };
 
+// * GET => /api/places/:pid
 const getPlaceById = (req, res, next) => {
   const place = DUMMY_PLACES.find(item => item.id === req.params.pid);
   if (!place) {
@@ -27,6 +29,7 @@ const getPlaceById = (req, res, next) => {
   res.status(200).json(place);
 };
 
+// * GET => /api/places/user/:uid
 const getPlaceByUserId = (req, res, next) => {
   const places = DUMMY_PLACES.filter(p => p.creator === req.params.uid);
   if (!places || places.length === 0) {
@@ -36,6 +39,7 @@ const getPlaceByUserId = (req, res, next) => {
   res.status(200).json(places);
 };
 
+// * POST => /api/places
 const createPlace = (req, res) => {
   const { title, description, cordinates, address, creator } = req.body;
   const createPlace = {
@@ -51,6 +55,7 @@ const createPlace = (req, res) => {
   res.status(201).json({ place: createPlace });
 };
 
+// * PUT => /api/places/:pid
 const updatePlaceById = (req, res, next) => {
   const pid = req.params.pid;
   const { title, description } = req.body;
@@ -70,6 +75,7 @@ const updatePlaceById = (req, res, next) => {
   res.status(200).json({ place: newPlace });
 };
 
+// * DELETE => /api/places/:pid
 const deletePlaceById = (req, res) => {
   const pid = req.params.pid;
   DUMMY_PLACES = DUMMY_PLACES.filter(places => places.id !== pid);

@@ -18,6 +18,11 @@ exports.getUsers = (req, res, next) => {
 // * POST => /api/users/signup
 exports.signup = (req, res, next) => {
   const { name, email, password } = req.body;
+  const hasUser = DUMMY_USERS.find(u => u.email === email);
+  if (hasUser) {
+    const error = new HttpError('このメールアドレスはすでに登録されています', 422);
+    return next(error);
+  };
   const createUser = {
     id: uuidv4(),
     name,
