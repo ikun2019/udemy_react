@@ -18,7 +18,7 @@ const getPlaces = (req, res) => {
   res.json(DUMMY_PLACES);
 };
 
-const getPlaceById = (req, res) => {
+const getPlaceById = (req, res, next) => {
   const place = DUMMY_PLACES.find(item => item.id === req.params.pid);
   if (!place) {
     const error = new HttpError('idが見つかりません', 404);
@@ -27,13 +27,13 @@ const getPlaceById = (req, res) => {
   res.status(200).json(place);
 };
 
-const getPlaceByUserId = (req, res) => {
-  const place = DUMMY_PLACES.find(item => item.creator === req.params.uid);
-  if (!place) {
-    const error = new HttpError('ユーザーが見つかりません', 404);
+const getPlaceByUserId = (req, res, next) => {
+  const places = DUMMY_PLACES.filter(p => p.creator === req.params.uid);
+  if (!places || places.length === 0) {
+    const error = new HttpError('ユーザーのplaceが見つかりません', 404);
     return next(error);
   };
-  res.status(200).json(place);
+  res.status(200).json(places);
 };
 
 const createPlace = (req, res) => {
@@ -51,7 +51,7 @@ const createPlace = (req, res) => {
   res.status(201).json({ place: createPlace });
 };
 
-const updatePlaceById = (req, res) => {
+const updatePlaceById = (req, res, next) => {
   const pid = req.params.pid;
   const { title, description } = req.body;
   const updatePlace = DUMMY_PLACES.find(place => place.id === pid);
