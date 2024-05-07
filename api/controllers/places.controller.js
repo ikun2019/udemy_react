@@ -1,6 +1,10 @@
 const HttpError = require('../models/http-error');
+const getCoordsForAddress = require('../utils/location');
+
 const { v4: uuidv4 } = require('uuid');
 const { validationResult } = require('express-validator');
+
+
 let DUMMY_PLACES = [
   {
     id: 'p1',
@@ -41,18 +45,26 @@ const getPlaceByUserId = (req, res, next) => {
 };
 
 // * POST => /api/places
-const createPlace = (req, res, next) => {
+const createPlace = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return next(new HttpError('入力内容に誤りがあります', 422))
   };
 
   const { title, description, cordinates, address, creator } = req.body;
+
+  let coordinates;
+  try {
+    coordinates = await getCoordsForAddress(address);
+  } catch (error) {
+    return next(error);
+  }
+
   const createPlace = {
     id: uuidv4(),
     title,
     description,
-    location: cordinates,
+    location: coordinates,
     address,
     creator,
   };
