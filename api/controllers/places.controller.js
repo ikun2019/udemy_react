@@ -27,13 +27,20 @@ const getPlaces = (req, res) => {
 };
 
 // * GET => /api/places/:pid
-const getPlaceById = (req, res, next) => {
-  const place = DUMMY_PLACES.find(item => item.id === req.params.pid);
+const getPlaceById = async (req, res, next) => {
+  // const place = DUMMY_PLACES.find(item => item.id === req.params.pid);
+  let place;
+  try {
+    place = await Place.findOne({ id: req.params.id });
+  } catch (err) {
+    const error = new HttpError('failed', 500);
+    return next(error);
+  }
   if (!place) {
     const error = new HttpError('idが見つかりません', 404);
     return next(error);
   }
-  res.status(200).json(place);
+  res.status(200).json({ place: place.toObject({ getters: true }) });
 };
 
 // * GET => /api/places/user/:uid
