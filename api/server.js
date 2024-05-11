@@ -1,6 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 
+// * データベースを接続
+const connectDB = require('./config/db');
+connectDB();
+
 const HttpError = require('./models/http-error');
 
 // * routerのimport
