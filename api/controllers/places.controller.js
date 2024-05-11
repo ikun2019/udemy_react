@@ -44,13 +44,20 @@ const getPlaceById = async (req, res, next) => {
 };
 
 // * GET => /api/places/user/:uid
-const getPlaceByUserId = (req, res, next) => {
-  const places = DUMMY_PLACES.filter(p => p.creator === req.params.uid);
+const getPlaceByUserId = async (req, res, next) => {
+  // const places = DUMMY_PLACES.filter(p => p.creator === req.params.uid);
+  let places;
+  try {
+    places = await Place.find({ creator: req.params.uid });
+  } catch (err) {
+    const error = new HttpError('failed', 500);
+    return next(error);
+  }
   if (!places || places.length === 0) {
     const error = new HttpError('ユーザーのplaceが見つかりません', 404);
     return next(error);
   };
-  res.status(200).json(places);
+  res.status(200).json({ places: places.map(place => place.toObject({ getters: true })) });
 };
 
 // * POST => /api/places
