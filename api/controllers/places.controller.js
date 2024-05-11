@@ -31,7 +31,7 @@ const getPlaceById = async (req, res, next) => {
   // const place = DUMMY_PLACES.find(item => item.id === req.params.pid);
   let place;
   try {
-    place = await Place.findOne({ id: req.params.id });
+    place = await Place.findById(req.params.pid);
   } catch (err) {
     const error = new HttpError('failed', 500);
     return next(error);
