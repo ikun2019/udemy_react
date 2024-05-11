@@ -97,38 +97,38 @@ const createPlace = async (req, res, next) => {
 };
 
 // * PUT => /api/places/:pid
-const updatePlaceById = (req, res, next) => {
+const updatePlaceById = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return next(new HttpError('入力内容に誤りがあります', 422));
   };
 
-  const pid = req.params.pid;
-  const { title, description } = req.body;
-  const updatePlace = DUMMY_PLACES.find(place => place.id === pid);
-  if (!updatePlace) {
+  let place;
+  try {
+    place = await Place.findByIdAndUpdate(req.params.pid, {
+      $set: req.body,
+    });
+  } catch (err) {
+    const error = new HttpError('failed', 500);
+    return next(error);
+  };
+
+  if (!place) {
     const error = HttpError('placeが見つかりません', 404);
     return next(error);
   };
 
-  const placeIndex = DUMMY_PLACES.findIndex(p => p.id === pid);
-  const newPlace = {
-    ...updatePlace,
-    title: title,
-    description: description,
-  };
-  DUMMY_PLACES[placeIndex] = newPlace;
-  res.status(200).json({ place: newPlace });
+  res.status(200).json({ place: place.toObject({ getters: true }) });
 };
 
 // * DELETE => /api/places/:pid
-const deletePlaceById = (req, res, next) => {
-  const pid = req.params.pid;
-  if (!DUMMY_PLACES.find(p => p.id === pid)) {
-    return next(new HttpError('指定されたidのplaceが見つかりません', 404));
-  };
-
-  DUMMY_PLACES = DUMMY_PLACES.filter(places => places.id !== pid);
+const deletePlaceById = async (req, res, next) => {
+  try {
+    await Place.findByIdAndDelete(req.params.pid);
+  } catch (err) {
+    const error = new HttpError('failed', 500);
+    return next(error);
+  }
   res.status(200).json({ message: 'Deleted place.' });
 };
 
