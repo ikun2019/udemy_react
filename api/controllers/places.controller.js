@@ -4,6 +4,8 @@ const getCoordsForAddress = require('../utils/location');
 const { v4: uuidv4 } = require('uuid');
 const { validationResult } = require('express-validator');
 
+// * modelのインポート
+const Place = require('../models/Place');
 
 let DUMMY_PLACES = [
   {
@@ -51,7 +53,7 @@ const createPlace = async (req, res, next) => {
     return next(new HttpError('入力内容に誤りがあります', 422))
   };
 
-  const { title, description, cordinates, address, creator } = req.body;
+  const { title, description, address, creator } = req.body;
 
   let coordinates;
   try {
@@ -60,16 +62,23 @@ const createPlace = async (req, res, next) => {
     return next(error);
   }
 
-  const createPlace = {
-    id: uuidv4(),
+  const createPlace = new Place({
     title,
     description,
-    location: coordinates,
     address,
+    location: coordinates,
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Front_Facade_Judes_Church_Chinnathurai_Mar24_A7C_09994.jpg/800px-Front_Facade_Judes_Church_Chinnathurai_Mar24_A7C_09994.jpg',
     creator,
-  };
+  })
 
-  DUMMY_PLACES.push(createPlace);
+  // DUMMY_PLACES.push(createPlace);
+  try {
+    await createPlace.save();
+  } catch (err) {
+    const error = new HttpError('faild', 500);
+    return next(error);
+  }
+
   res.status(201).json({ place: createPlace });
 };
 
