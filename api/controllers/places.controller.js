@@ -9,19 +9,6 @@ const { validationResult } = require('express-validator');
 const Place = require('../models/Place');
 const User = require('../models/User');
 
-let DUMMY_PLACES = [
-  {
-    id: 'p1',
-    title: 'Empire State Building',
-    description: 'One of the most famous scrapers in the world.',
-    location: {
-      lat: 40.7484405,
-      lng: -73.9856644,
-    },
-    address: '20 W 34th St., New York, NY 10001',
-    creator: 'u1'
-  }
-]
 
 // * GET => /api/places
 const getPlaces = (req, res) => {
@@ -47,7 +34,6 @@ const getPlaceById = async (req, res, next) => {
 
 // * GET => /api/places/user/:uid
 const getPlaceByUserId = async (req, res, next) => {
-  // let places;
   let userWithPlaces;
   try {
     userWithPlaces = await User.findById(req.params.uid).populate('places');
