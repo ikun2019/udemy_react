@@ -23,7 +23,7 @@ exports.signup = async (req, res, next) => {
     return next(new HttpError('入力内容に誤りがあります', 422));
   }
 
-  const { name, email, password, places } = req.body;
+  const { name, email, password } = req.body;
   let user;
   try {
     const hasUser = await User.findOne({ email: email });
@@ -36,7 +36,7 @@ exports.signup = async (req, res, next) => {
       email,
       image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Kaioke_%28lacquer_container_for_shell_matching_game%29%2C_Japan.jpg/800px-Kaioke_%28lacquer_container_for_shell_matching_game%29%2C_Japan.jpg',
       password,
-      places,
+      places: [],
     });
     await user.save();
   } catch (err) {

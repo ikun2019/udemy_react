@@ -2,10 +2,12 @@ const HttpError = require('../models/http-error');
 const getCoordsForAddress = require('../utils/location');
 
 const { v4: uuidv4 } = require('uuid');
+const mongoose = require('mongoose');
 const { validationResult } = require('express-validator');
 
 // * modelのインポート
 const Place = require('../models/Place');
+const User = require('../models/User');
 
 let DUMMY_PLACES = [
   {
@@ -83,11 +85,27 @@ const createPlace = async (req, res, next) => {
     location: coordinates,
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Front_Facade_Judes_Church_Chinnathurai_Mar24_A7C_09994.jpg/800px-Front_Facade_Judes_Church_Chinnathurai_Mar24_A7C_09994.jpg',
     creator,
-  })
+  });
 
-  // DUMMY_PLACES.push(createPlace);
+  let user;
   try {
-    await createPlace.save();
+    user = await User.findById(creator);
+  } catch (err) {
+    const error = new HttpError('failed', 500);
+    return next(error);
+  };
+  if (!user) {
+    const error = new HttpError('failed', 500);
+    return next(error);
+  }
+
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await createPlace.save({ session: sess });
+    user.places.push(createPlace);
+    await user.save({ session: sess });
+    await sess.commitTransaction();
   } catch (err) {
     const error = new HttpError('faild', 500);
     return next(error);
