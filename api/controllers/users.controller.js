@@ -49,17 +49,21 @@ exports.signup = async (req, res, next) => {
 };
 
 // * POST => /api/users/login
-
-exports.login = (req, res, next) => {
+exports.login = async (req, res, next) => {
   const { email, password } = req.body;
-  const user = DUMMY_USERS.find(u => u.email === email);
-  if (!user) {
-    const error = new HttpError('ユーザーが存在しません', 401);
+  try {
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      const error = new HttpError('ユーザーが存在しません', 401);
+      return next(error);
+    };
+    if (user.password !== password) {
+      const error = new HttpError('パスワードが一致しません', 401);
+      return next(error);
+    };
+  } catch (err) {
+    const error = new HttpError('failed', 500);
     return next(error);
-  };
-  if (user.password !== password) {
-    const error = new HttpError('パスワードが一致しません', 401);
-    return next(error);
-  };
+  }
   res.status(200).json({ message: 'Logged In' });
 };
