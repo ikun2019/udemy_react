@@ -3,10 +3,10 @@ const { getUsers, signup, login } = require('../controllers/users.controller');
 
 const router = require('express').Router();
 
-// * GET => /api/users
+// @GET => /api/users
 router.get('/', getUsers);
 
-// * POST => /api/users/signup
+// @POST => /api/users/signup
 router.post('/signup',
   [
     check('name').not().isEmpty(),
@@ -16,7 +16,7 @@ router.post('/signup',
   signup
 );
 
-// * POST => /api/users/login
+// @POST => /api/users/login
 router.post('/login', login);
 
 module.exports = router;
