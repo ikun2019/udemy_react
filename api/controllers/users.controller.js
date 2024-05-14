@@ -49,8 +49,9 @@ exports.signup = async (req, res, next) => {
 // * POST => /api/users/login
 exports.login = async (req, res, next) => {
   const { email, password } = req.body;
+  let user;
   try {
-    const user = await User.findOne({ email: email });
+    user = await User.findOne({ email: email });
     if (!user) {
       const error = new HttpError('ユーザーが存在しません', 401);
       return next(error);
@@ -63,5 +64,5 @@ exports.login = async (req, res, next) => {
     const error = new HttpError('failed', 500);
     return next(error);
   }
-  res.status(200).json({ message: 'Logged In' });
+  res.status(200).json({ message: 'Logged In', user: user.toObject({ getters: true }) });
 };
