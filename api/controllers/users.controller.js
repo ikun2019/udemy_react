@@ -20,11 +20,13 @@ exports.getUsers = async (req, res, next) => {
 exports.signup = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.error(errors.array());
     return next(new HttpError('入力内容に誤りがあります', 422));
   }
 
   const { name, email, password } = req.body;
   let user;
+  console.log('REQ_FILE_PATH =>', req.file.path);
   try {
     const hasUser = await User.findOne({ email: email });
     if (hasUser) {
@@ -34,7 +36,7 @@ exports.signup = async (req, res, next) => {
     user = new User({
       name,
       email,
-      image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Kaioke_%28lacquer_container_for_shell_matching_game%29%2C_Japan.jpg/800px-Kaioke_%28lacquer_container_for_shell_matching_game%29%2C_Japan.jpg',
+      image: req.file.path,
       password,
       places: [],
     });

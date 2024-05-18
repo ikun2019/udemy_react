@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 
 // * データベースを接続
 const connectDB = require('./config/db');
@@ -15,6 +17,9 @@ const usersRouter = require('./routes/users.route');
 const app = express();
 app.use(express.json(), express.urlencoded({ extended: false }), cors());
 
+// * publicフォルダの指定
+app.use('/uploads/images', express.static(path.join('uploads', 'images')));
+
 // * routerをExpressに結合
 app.use('/api/places', placesRouter);
 app.use('/api/users', usersRouter);
@@ -25,6 +30,11 @@ app.use((req, res, next) => {
   return next(error);
 });
 app.use((error, req, res, next) => {
+  if (req.file) {
+    fs.unlink(req.file.path, (err) => {
+      console.log(err);
+    });
+  };
   if (res.headersSent) {
     return next(error);
   };
