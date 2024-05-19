@@ -68,7 +68,8 @@ exports.login = async (req, res, next) => {
       const error = new HttpError('ユーザーが存在しません', 401);
       return next(error);
     };
-    if (user.password !== password) {
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (isMatch) {
       const error = new HttpError('パスワードが一致しません', 401);
       return next(error);
     };
