@@ -12,6 +12,7 @@
 	"dependencies": {
 		"@googlemaps/js-api-loader": "^1.16.6",
 		"axios": "^1.6.8",
+		"bcryptjs": "^2.4.3",
 		"cors": "^2.8.5",
 		"express": "^4.19.2",
 		"express-validator": "^7.0.1",

@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const { validationResult } = require('express-validator');
+const bcrypt = require('bcryptjs');
 
 const HttpError = require('../models/http-error');
 const User = require('../models/User');
@@ -26,18 +27,27 @@ exports.signup = async (req, res, next) => {
 
   const { name, email, password } = req.body;
   let user;
-  console.log('REQ_FILE_PATH =>', req.file.path);
+
   try {
     const hasUser = await User.findOne({ email: email });
     if (hasUser) {
       const error = new HttpError('このメールアドレスはすでに登録されています', 422);
       return next(error);
     };
+
+    let hashedPassword
+    try {
+      hashedPassword = await bcrypt.hash(password, 12);
+    } catch (err) {
+      const error = new HttpError('再度登録してください', 500);
+      return next(error);
+    }
+
     user = new User({
       name,
       email,
       image: req.file.path,
-      password,
+      password: hashedPassword,
       places: [],
     });
     await user.save();
