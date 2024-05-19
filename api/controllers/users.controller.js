@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const HttpError = require('../models/http-error');
 const User = require('../models/User');
@@ -55,7 +56,14 @@ exports.signup = async (req, res, next) => {
     const error = new HttpError('failed', 500);
     return next(error);
   }
-  res.status(201).json({ user: user.toObject({ getters: true }) });
+  let token;
+  try {
+    token = jwt.sign({ userId: user.id, email: user.email }, 'secret', { expiresIn: '1h' });
+  } catch (err) {
+    const error = new HttpError('再度登録してください', 500);
+    return next(error);
+  }
+  res.status(201).json({ userId: user.id, email: user.email, token: token });
 };
 
 // * POST => /api/users/login
@@ -69,7 +77,7 @@ exports.login = async (req, res, next) => {
       return next(error);
     };
     const isMatch = await bcrypt.compare(password, user.password);
-    if (isMatch) {
+    if (!isMatch) {
       const error = new HttpError('パスワードが一致しません', 401);
       return next(error);
     };
@@ -77,5 +85,12 @@ exports.login = async (req, res, next) => {
     const error = new HttpError('failed', 500);
     return next(error);
   }
-  res.status(200).json({ message: 'Logged In', user: user.toObject({ getters: true }) });
+  let token;
+  try {
+    token = jwt.sign({ userId: user.id, email: user.email }, 'secret', { expiresIn: '1h' });
+  } catch (err) {
+    const error = new HttpError('再度登録してください', 500);
+    return next(error);
+  }
+  res.status(200).json({ userId: user.id, email: user.email, token: token });
 };
