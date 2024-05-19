@@ -4,6 +4,7 @@ const getCoordsForAddress = require('../utils/location');
 const { v4: uuidv4 } = require('uuid');
 const mongoose = require('mongoose');
 const { validationResult } = require('express-validator');
+const fs = require('fs');
 
 // * modelのインポート
 const Place = require('../models/Place');
@@ -139,6 +140,8 @@ const deletePlaceById = async (req, res, next) => {
     return next(error);
   }
 
+  const imagePath = place.image;
+
   try {
     const sess = await mongoose.startSession();
     sess.startTransaction();
@@ -151,6 +154,11 @@ const deletePlaceById = async (req, res, next) => {
     const error = new HttpError('placeの削除に失敗しました', 500);
     return next(error);
   }
+
+  fs.unlink(imagePath, (err) => {
+    console.error(err);
+  });
+
   res.status(200).json({ message: 'Deleted place.' });
 };
 
