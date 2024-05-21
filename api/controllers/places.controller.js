@@ -110,9 +110,7 @@ const updatePlaceById = async (req, res, next) => {
 
   let place;
   try {
-    place = await Place.findByIdAndUpdate(req.params.pid, {
-      $set: req.body,
-    });
+    place = await Place.findById(req.params.pid);
   } catch (err) {
     const error = new HttpError('failed', 500);
     return next(error);
@@ -122,6 +120,22 @@ const updatePlaceById = async (req, res, next) => {
     const error = HttpError('placeが見つかりません', 404);
     return next(error);
   };
+
+  if (place.creator.toString() !== req.userData.userId) {
+    const error = new HttpError('許可されていません', 403);
+    return next(error);
+  };
+
+  const { title, description } = req.body;
+  place.title = title;
+  place.description = description;
+
+  try {
+    await place.save();
+  } catch (err) {
+    const error = new HttpError('サーバーエラーです', 500);
+    return next(error);
+  }
 
   res.status(200).json({ place: place.toObject({ getters: true }) });
 };
@@ -139,6 +153,11 @@ const deletePlaceById = async (req, res, next) => {
     const error = new HttpError('placeの取得に失敗しました', 500);
     return next(error);
   }
+
+  if (place.creator.toString() !== req.userData.userId) {
+    const error = new HttpError('許可されていません', 403);
+    return next(error);
+  };
 
   const imagePath = place.image;
 

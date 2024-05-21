@@ -12,7 +12,7 @@ module.exports = (req, res, next) => {
     next();
   } catch (err) {
     console.error(err);
-    const error = new HttpError('認証されていません', 401);
+    const error = new HttpError('認証されていません', 403);
     return next(error);
   }
 };
