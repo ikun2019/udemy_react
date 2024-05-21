@@ -56,7 +56,7 @@ const createPlace = async (req, res, next) => {
     return next(new HttpError('入力内容に誤りがあります', 422))
   };
 
-  const { title, description, address, creator } = req.body;
+  const { title, description, address } = req.body;
 
   let coordinates;
   try {
@@ -71,12 +71,12 @@ const createPlace = async (req, res, next) => {
     address,
     location: coordinates,
     image: req.file.path,
-    creator,
+    creator: req.userDate.userId,
   });
 
   let user;
   try {
-    user = await User.findById(creator);
+    user = await User.findById(req.userDate.userId);
   } catch (err) {
     const error = new HttpError('failed', 500);
     return next(error);
